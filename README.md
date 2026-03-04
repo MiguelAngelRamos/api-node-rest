@@ -35,7 +35,7 @@ npm install
 3. Configura las variables de entorno (opcional):
 Crea un archivo `.env` en la raíz del proyecto para configurar el secreto JWT y otros parámetros.
 
-## 🏃‍♂️ Ejecución
+##  Ejecución
 
 ### Modo desarrollo
 ```bash
@@ -88,7 +88,7 @@ api-node-ts/
 - **class-validator** - Validación de objetos
 - **class-transformer** - Transformación de objetos
 
-## 🔌 Endpoints
+##  Endpoints
 
 ### POST /auth/register
 
@@ -217,7 +217,7 @@ MIT
 
 ---
 
-## 👨‍💻 Autor
+##  Autor
 
 **Miguel Ángel Ramos**
 
