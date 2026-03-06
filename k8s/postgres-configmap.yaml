@@ -1,0 +1,7 @@
+apiVersion: v1
+# Los configmaps son como los secrets, pero para variables NO sensibles, como configuraciones generales de la aplicacion
+kind: ConfigMap
+metadata:
+  name: postgres-config
+data:
+  POSTGRES_DB: api_db
