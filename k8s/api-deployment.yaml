@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  # Nombre unico que identificará a este deployment en el cluster
+  name: node-api
+spec:
+  # Numero de replicas exactas de nuestra aplicacion 
+  replicas: 2
+  # Etiqueta clase para que el deployment sepa cuales pods le pertenecen
+  selector:
+    matchLabels:
+      app: node-api
+  # Plantilla de los pods que se van a crear
+  template:
+    metadata:
+    # Etiquetas que se le pondran a todos los pods creados por esta plantilla
+      labels:
+        app: node-api
+    # Especificaciones fisicas del pod
+    spec:
+      containers:
+        # Lista de contenedores que se ejecutaran en el pod
+        - name: node-api
+          image: node-api-ts:latest
+          imagePullPolicy: IfNotPresent
+          # El puerto en el que nuestra aplicacion Node.js escucha internamente
+          ports:
+            - containerPort: 3000
+          # Variables de entorno para configurar la aplicacion
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: DB_HOST
+              value: "postgres-service"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_USER
+              # Al inyectar las contraseñas, No las ponemos en plano, extraemos el valor de un secret seguro
