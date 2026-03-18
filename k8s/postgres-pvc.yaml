@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+spec:
+  accessModes:  
+    - ReadWriteOnce
+  resources:
+    requests:
+      # Reclama un espacio de un 1.07 GB de espacio en el disco duro de Ubunto server 
+      storage: 1Gi
