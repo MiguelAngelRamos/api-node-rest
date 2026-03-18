@@ -36,3 +36,46 @@ spec:
               value: "5432"
             - name: DB_USER
               # Al inyectar las contraseñas, No las ponemos en plano, extraemos el valor de un secret seguro
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-config
+                  key: POSTGRES_DB
+          resources:
+            # Recursos mínimos garantizados para cada pod
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            # Recursos máximos que un pod puede usar, si se excede, el pod puede ser reiniciado
+            limits:
+              memory: "256Mi"
+              cpu: "250m"
+          # PRUEBA DE VIDA (livenessProbe) 
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            # Esperamos 15 segundos después de que el contenedor se inicie antes de realizar la primera comprobación de salud
+            initialDelaySeconds: 15
+            # Repetir la prueba cada 10 segundos
+            periodSeconds: 10
+            # Si falla 3 veces seguidas, matamos el pod
+            failureThreshold: 3
+          # PRUEBA DE DISPONIBILIDAD (readinessProbe)
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            # Si pasa exitosamente una vez lo declaramos apto para recibir tráfico
+            successThreshold: 1
