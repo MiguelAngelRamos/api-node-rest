@@ -13,3 +13,18 @@ docker build -t node-api-ts:latest .
 ```sh
 minikube image ls
 ```
+
+
+
+Nota: arrancar minikube 
+
+```sh
+
+# Comando personaliza en mi caso
+minikube start \
+  --driver=docker \
+  --cpus=4 \
+  --memory=8192 \
+  --disk-size=40g \
+  --kubernetes-version=stable
+```
