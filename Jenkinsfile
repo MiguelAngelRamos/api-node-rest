@@ -19,6 +19,38 @@ pipeline {
             }
         }
 
+        stage('Test & SCA') {
+          agent {
+            docker {
+                image 'node:20-alpine'
+                args '-u root:root --entrypoint=""' // Ejecutar como root para evitar problemas de permisos con node_modules
+                reusdeNode true // Reutilizar el contenedor para mantener node_modules entre etapas
+            }
+          }
+            steps {
+              script {
+                echo "Instalando dependencias y ejecutando tests dentro del contenedor Docker..."
+                sh 'npm ci'
+                sh 'npm run test:ci'
+                
+                echo "Verificando vulnerabilidades con npm audit..."
+                sh 'npm audit --audit-level=high' // Falla si se encuentran vulnerabilidades de nivel alto o crítico
+              }
+            }
+        }
+
+        stage('SAST - SonarQube') {
+            steps {
+              script {
+                echo "Analizando el código fuente con SonarQube (SAST)..."
+                def scannerHome = tool 'sonar-scanner'
+                withSonarQubeEnv('sonarqube') {
+                    sh "${scannerHome}/bin/sonar-scanner"
+                }
+              }
+            }
+        }
+
         stage('Construir y Cargar Imagen en Minikube') {
             steps {
                 script {
@@ -34,6 +66,23 @@ pipeline {
             }
         }
 
+        stage('Container Scanning - Trivy') {
+            steps {
+                script {
+                    echo "Escaneando la imagen Docker en busca de CVES (Container Scanning)..."
+                    // Ejecutamos Trivy directamente contra la imagen cargada en Minikube
+                    sh """
+                        docker run --rm \
+                            -v /var/run/docker.sock:/var/run/docker.sock \
+                            aquasec/trivy:0.69.3 image \
+                            --exit-code 1 \
+                            --severity CRITICAL \
+                            --no-progress \
+                            ${DOCKER_IMAGE}:${BRANCH_TAG}
+                    """
+                }
+            }
+        }
         // Se elimina la fase de Push a Docker Hub porque la imagen ya vive dentro del clúster
         
         stage('Desplegar en K8s (Minikube)') {
