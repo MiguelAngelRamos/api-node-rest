@@ -83,7 +83,24 @@ pipeline {
                 }
             }
         }
-        // Se elimina la fase de Push a Docker Hub porque la imagen ya vive dentro del clúster
+
+        stage('IaC Scanning - Checkov') {
+          steps {
+            script {
+              echo "Escaneando manifestos de kubernetes en busca de malas practicas de seguridad (IaC Scanning)..."
+
+              sh """
+                  docker run --rm \
+                      -v ${WORKSPACE}/k8s:/k8s \
+                      bridgecrew/checkov \
+                      -d /k8s \
+                      --framework kubernetes \
+                      --quiet \
+                      --soft-fail
+                    """
+            }
+          }
+        }
         
         stage('Desplegar en K8s (Minikube)') {
             steps {
